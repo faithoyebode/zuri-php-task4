@@ -1,7 +1,7 @@
 <?php session_start();
  require_once('../db-connection.php');
  $conn = openCon();
- 
+
     $errorCount = 0;
     //Assign variables to user inputs
     $email = $_POST['email'] != "" ? $_POST['email'] : $errorCount++;
@@ -23,52 +23,50 @@
     }else{
         // this section processes all the fields if there is no blank one on input
         //get all the user files in the database as an array
-        $allUsers = scandir("../db/users/");
-        $countAllUsers = count($allUsers);
+        $hashedPwd = password_hash($password, PASSWORD_DEFAULT);
+        $result = $conn->query("SELECT * FROM users WHERE email='{$email}'");
+        $currentUser = mysqli_fetch_assoc($result);
+
+        $passwordFromDB = $currentUser['password'];
+        $passwordFromUser = password_verify($password, $passwordFromDB);
+        echo $passwordFromUser;
+        //$countAllUsers = count($allUsers);
+
+        if($passwordFromUser === true){
+            
+            //redirect to dashboard
+            date_default_timezone_set("Africa/Lagos");
+            $loginTime = date('H:i:s');
+            $loginDate = date('Y-m-d');
+            $_SESSION['logInTime'] = $loginTime;
+            $_SESSION['logInDate'] = $loginDate;
+            $_SESSION['lastLogDate'] = isset($currentUser['lastLogDate']) ? $currentUser['lastLogDate'] : '';
+            $_SESSION['lastLogTime'] = isset($currentUser['lastLogTime']) ? $currentUser['lastLogTime'] : '';
+            $_SESSION['fullname'] = $currentUser['first_name'] . " " . $currentUser['last_name'];
+            
+            //Record New Last Login Time and Date
+            $currentUser['lastLogTime'] = $loginTime;
+            $currentUser['lastLogDate'] = $loginDate;
+            $sql = "UPDATE users SET lastLogTime = '{$currentUser['lastLogTime']}', lastLogDate = '{$currentUser['lastLogDate']}' WHERE email='{$email}'";
+            $result = $conn->query($sql);
         
-        for ($counter=0; $counter < $countAllUsers; $counter++){
-            $currentUser = $allUsers[$counter];
-            if($currentUser == $email . ".json"){
-                //check user password
-                $userString=file_get_contents("../db/users/" . $currentUser);
-                $userObject = json_decode($userString);
-                $passwordFromDB = ($userObject->password);
-                $passwordFromUser = password_verify($password, $passwordFromDB);
-                
-
-                if($passwordFromUser == true){
-                    
-                    //redirect to dashboard
-                    date_default_timezone_set("Africa/Lagos");
-                    $loginTime = date('h:i:sa');
-                    $loginDate = date('d/m/Y');
-                    $_SESSION['logInTime'] = $loginTime;
-                    $_SESSION['logInDate'] = $loginDate;
-                    $_SESSION['lastLogDate'] = isset($userObject->lastLogDate) ? $userObject->lastLogDate : '';
-                    $_SESSION['lastLogTime'] = isset($userObject->lastLogTime) ? $userObject->lastLogTime : '';
-                    $_SESSION['loggedIn'] = $userObject->id;
-                    $_SESSION['fullname'] = $userObject->first_name . " " . $userObject->last_name;
-                   
-                    //Record New Last Login Time and Date
-                    $userObject->lastLogTime = $loginTime;
-                    $userObject->lastLogDate = $loginDate;
-                    file_put_contents("../db/users/" . $currentUser, json_encode($userObject));
-                    header("Location: ../dashboard.php");
-                    die();
-                    
-                }else{
-                    $session_error = "Invalid username or password";
-                    $_SESSION["loginError"] = $session_error;
-                    header("Location: ../login.php");
-                    die();
-                }
-                 
+            if($result === true){
+                $_SESSION['loggedIn'] = $currentUser['id'];
+                header("Location: ../dashboard.php");
+                die();
+            }else{
+                $session_error = $conn->error;
+                $_SESSION["loginError"] = $session_error;
+                header("Location: ../login.php");
+                die();
             }
-
+            
+        }else{
+            $session_error = "Invalid username or password";
+            $_SESSION["loginError"] = $session_error;
+            header("Location: ../login.php");
+            die();
         }
-        $session_error = "Invalid username or password";
-        $_SESSION["loginError"] = $session_error;
-        header("Location: ../login.php");
-        die();
+                 
     }
 ?>
