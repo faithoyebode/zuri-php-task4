@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS `courses` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) NOT NULL,
+	`name` VARCHAR(255) NOT NULL,
+	`description` VARCHAR(1000) NOT NULL,
+	PRIMARY KEY (`id`),
+	FOREIGN KEY (`user_id`) REFERENCES users(`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

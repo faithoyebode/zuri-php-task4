@@ -1,4 +1,7 @@
-<?php session_start(); 
+<?php session_start();
+ require_once('../db-connection.php');
+ $conn = openCon();
+ 
     $errorCount = 0;
     //Assign variables to user inputs
     $email = $_POST['email'] != "" ? $_POST['email'] : $errorCount++;

@@ -1,4 +1,6 @@
  <?php session_start(); 
+ require_once('../db-connection.php');
+ $conn = openCon();
     //collecting data
     $errorCount = 0;
     
@@ -179,15 +181,15 @@
             die();
         }
         //execute this part when there are no errors in the input
-        $allUsers = scandir("../db/users/");
+
+        $result = $conn->query("SELECT email FROM users");
+        $allUsers = mysqli_fetch_all($result, MYSQLI_ASSOC);
         $countAllUsers = count($allUsers);
-        $newUserId = ($countAllUsers - 2) + 1;
         $userObject= [
-            'id'=>$newUserId,
             'first_name'=>$first_name,
             'last_name'=>$last_name,
             'email'=>$email,
-            'password'=>password_hash($password,PASSWORD_DEFAULT),
+            'password'=>password_hash($password, PASSWORD_DEFAULT),
             'gender'=>$gender                                                                                                                                                                                                              
         ];
         
@@ -195,7 +197,7 @@
         // If its is, the user is redirected back to the register page with an error message
         for ($counter=0; $counter < $countAllUsers; $counter++){
             $currentUser = $allUsers[$counter];
-            if($currentUser == $email . ".json"){
+            if($currentUser["email"] == $email){
                 $_SESSION['registerError'] = "Registration failed, User already exist" ;
                 header("Location: ../register.php");
                 die();
@@ -204,15 +206,17 @@
         }
 
         //If everything is fine, the user records are saved in the database
-        file_put_contents("../db/users/" . $email . ".json", json_encode($userObject));
-        $_SESSION['regToLoginMessage'] = "Registration Successful, you can now login! " . $first_name ;
+        $sql = "INSERT INTO users (first_name, last_name, email, password, gender) VALUES ('{$userObject['first_name']}', '{$userObject['last_name']}', '{$userObject['email']}', '{$userObject['password']}', '{$userObject['gender']}')";
+
+        if($conn->query($sql) === TRUE){
+            //file_put_contents("../db/users/" . $email . ".json", json_encode($userObject));
+            $_SESSION['regToLoginMessage'] = "Registration Successful, you can now login! " . $first_name ;
+        }
+        
        
         //redirect the user to login page when registration is successful
         header("Location: ../login.php");
 }
     
-
-
-
     //saving data into the database
  ?>  
