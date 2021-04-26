@@ -1,4 +1,6 @@
 <?php session_start(); 
+ require_once('../db-connection.php');
+ $conn = openCon();
     //collecting data
     $errorCount = 0;
 
@@ -29,23 +31,24 @@
         
         header("Location: ../reset-password.php");
     }else{
-        $allUsers = scandir("../db/users/");
-        $countAllUsers = count($allUsers);
-        for ($counter=0; $counter < $countAllUsers; $counter++){
-            $currentUser = $allUsers[$counter];
-            if($currentUser == $email . ".json"){ 
-                $userString=file_get_contents("../db/users/" . $currentUser);
-                $userObject = json_decode($userString);
-                $userObject->password = password_hash($password, PASSWORD_DEFAULT);
+        $result = $conn->query("SELECT email FROM users WHERE email='{$email}'");
+        $currentUser = mysqli_fetch_assoc($result);
+        
+            if($currentUser["email"] == $email){ 
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-                file_put_contents("../db/users/" . $email . ".json", json_encode($userObject));
-                unset($_SESSION['loggedIn']);
-                $_SESSION['resetToLoginMessage'] = "Password Reset Successful, you can now login! " . $first_name ;
-            
-                //redirect the user to login page when reset password is successful
-                header("Location: ../login.php");
+                $sql = "UPDATE users SET password = '{$hashedPassword}' WHERE email='{$email}'";
+                $result = $conn->query($sql);
+
+                if($result === true){
+                    unset($_SESSION['loggedIn']);
+                    $_SESSION['resetToLoginMessage'] = "Password Reset Successful, you can now login! " . $first_name ;
+                    //redirect the user to login page when reset password is successful
+                    header("Location: ../login.php");
+
+                }
             }
-        }
+        
         //If after goung through all the email records in the database, the user's email is not found
         //the user will be redirected back to the forgot password page and an error message will be shown  
         // $_SESSION['error' = "Email not registered with us ERR: " . $email;
