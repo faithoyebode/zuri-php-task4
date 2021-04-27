@@ -2,41 +2,25 @@
 
 ?>
 <h3 class="pt-5">Create New Course</h3>
-
-    <?php 
-        
-    ?>
-    <p>
-        <?php
-        
-           if(isset($_SESSION['regToLoginMessage'])){
-                echo "<span style='color:red'>" . $_SESSION['regToLoginMessage'] . "</span>";
-                    
-            }
-            if(isset($_SESSION['resetToLoginMessage'])){
-                echo "<span style='color:red'>" . $_SESSION['resetToLoginMessage'] . "</span>";
-                    
-            }
-        ?>
-    </p>
      
     <form method="POST" action="./processes/process-course-ceation.php" class="w-50">
         <p>
             <?php
                 if(isset($_SESSION['courseCreationError']) && !empty($_SESSION['courseCreationError'])){
-                    echo "<span style='color:red'>" . $_SESSION['loginError'] . "</span>";
+                    echo "<span style='color:red'>" . $_SESSION['courseCreationError'] . "</span>";
                 }
             ?>
         </p>
         
         <p class="form-group">
             <label>Name</label><br />
-            <input 
-            <?php
+            <input
+            value= 
+            "<?php
                 if(isset($_SESSION['course-name'])){
-                   echo "value=" . $_SESSION['course-name'];
+                   echo $_SESSION['course-name'];
                 }
-            ?>
+            ?>"
             type="text" name="name" placeholder="Name of course" class="form-control" required>
         </p>
         <p class="form-group">
@@ -45,15 +29,15 @@
                 name="description" 
                 id="description" 
                 cols="30" rows="5" 
-                <?php
-                    if(isset($_SESSION['course-description'])){
-                        echo "value=" . $_SESSION['course-description'];
-                    }
-                ?>
                 placeholder="What is this course about?" 
                 class="form-control" 
                 required
             >
+                <?php
+                    if(isset($_SESSION['course-description'])){
+                        echo htmlspecialchars($_SESSION['course-description']);
+                    }
+                ?>
             </textarea>
         </p>
         

@@ -5,6 +5,10 @@
         //redirect to dashboard
         header("Location: ../login.php");
     }
+    unset($_SESSION['course-id']);
+    unset($_SESSION['course-name']);
+    unset($_SESSION['course-description']);
+
 ?>
     <h3 class="pt-5">Dashboard</h3>
     <!-- <p>
@@ -45,6 +49,13 @@
             <?php
                 if(isset($_SESSION['courseDeleteError'])){
                     echo "<span style='color:red'>" . $_SESSION['courseDeleteError'] . "</span>";
+                }
+            ?>
+        </p>
+        <p>
+            <?php
+                if(isset($_SESSION['courseEditError'])){
+                    echo "<span style='color:red'>" . $_SESSION['courseEditError'] . "</span>";
                 }
             ?>
         </p>
@@ -102,5 +113,6 @@
     unset($_SESSION['successCreateMessage']);
     unset($_SESSION['courseDeleteMsg']);
     unset($_SESSION['courseDeleteError']);
+    unset($_SESSION['courseEditError']);
     require_once('lib/footer.php'); 
 ?>

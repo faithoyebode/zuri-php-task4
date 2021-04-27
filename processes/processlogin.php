@@ -9,8 +9,6 @@
     $_SESSION['email'] = $email; 
     //if any of the field is empty, execute this
     if($errorCount > 0){
-        echo "about to work";
-                die();
         //this section determines the number of empty fields, output them and prevents login
         $session_error = "You have " . $errorCount . " error";
         if($errorCount > 1) {
