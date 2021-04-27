@@ -211,11 +211,16 @@
         if($conn->query($sql) === TRUE){
             //file_put_contents("../db/users/" . $email . ".json", json_encode($userObject));
             $_SESSION['regToLoginMessage'] = "Registration Successful, you can now login! " . $first_name ;
+            //redirect the user to login page when registration is successful
+            header("Location: ../login.php");
+        }else{
+            $session_error = $conn->error;
+            $_SESSION["registerError"] = $session_error;
+            header("Location: ../register.php");
         }
         
        
-        //redirect the user to login page when registration is successful
-        header("Location: ../login.php");
+        
 }
     
     //saving data into the database
