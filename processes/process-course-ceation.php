@@ -28,6 +28,7 @@
         //do actual reset things here
         //check that the email is registered in tokens folder
         //check if the content of the registered token (in our folder) is thesame as token 
+        
         $result = $conn->query("SELECT name FROM courses WHERE user_id='{$_SESSION['loggedIn']}'");
         $allMyCourses = mysqli_fetch_all($result, MYSQLI_ASSOC);
         $countAllMyCourses = count($allMyCourses);
@@ -54,6 +55,21 @@
                 }
             }
         }
+
+        //If the user is creating a course for the very first time
+        $sql = "INSERT INTO courses (name, description, user_id) VALUES ('{$name}', '{$description}', '{$_SESSION['loggedIn']}')";
+
+        if($conn->query($sql) === TRUE){
+            //file_put_contents("../db/users/" . $email . ".json", json_encode($userObject));
+            $_SESSION['successCreateMessage'] = "Course Creation Successful!";
+            header("Location: ../dashboard.php");
+            die();
+        }else{
+            $_SESSION['courseCreationError'] = $conn->error;
+            header("Location: ../create-course.php");
+            die();
+        }
+    
 
     }
 ?>    
